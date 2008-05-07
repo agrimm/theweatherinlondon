@@ -1,0 +1,111 @@
+class Article < ActiveRecord::Base
+  validates_presence_of :title
+
+  def get_uri
+    unless self.uri == nil
+      return self.uri
+    else 
+      require 'uri'
+      underscored_title = title.gsub(" ", "_")
+      return URI.escape("http://en.wikipedia.org/wiki/" + underscored_title)
+    end
+  end
+
+  def self.break_up_phrase(phrase)
+    words = phrase.split(/[[:space:],.""'']+/)
+    words
+  end
+
+  #Determine if a phrase is boring
+  #That is, it has one or zero non-boring words
+  def self.phrase_is_boring?(phrase)
+    words = break_up_phrase(phrase)
+    #count how many words are non-boring
+    boring_words = %w{a and also are be been for get has in is just me of on only see than this the there was january february march april may june july august september october november december}
+    number_non_boring_words = 0
+    words.each do |word|
+      number_non_boring_words += 1 unless boring_words.include?(word.downcase)
+    end
+    return true unless number_non_boring_words > 1
+  end
+
+  #Return all articles that match the requested phrase
+  #Probably should only return one article, but return an array just in case
+  def self.find_matching_articles(phrase)
+    return [] if phrase_is_boring?(phrase)
+    articles = find(:all, :conditions => ["title = ?", phrase])
+    articles
+  end
+
+  #Informs the caller if they should try a longer phrase than the current one in order to get a match
+  def self.try_longer_phrase?(phrase)
+    if phrase.length < 6 or phrase_is_boring?(phrase)
+      return true #Otherwise it chews up too much server time
+    end
+    potentially_matching_articles = find(:all, :conditions => ["title like ?", phrase + "%"], :limit=>2)
+    return !potentially_matching_articles.empty?
+  end
+
+  #Read in a document, and return an array of phrases and their matching articles
+  #Strategy: split into words, then iterate through the words
+  def self.parse_text_document(document_text)
+    parse_results = []
+    words = break_up_phrase(document_text)
+    i = 0
+    while(true)
+      j = 0
+      phrase = words[i + j]
+      while(true)
+        matching_articles = find_matching_articles(phrase)
+        matching_articles.each do |matching_article|
+          parse_results << [phrase, matching_article]
+        end
+  
+        break unless (try_longer_phrase?(phrase) and i + j + 1 < words.size)
+        j = j + 1
+        phrase += " "
+        phrase += words[i + j]
+      end
+
+      break unless (i + 1 < words.size)
+      i = i + 1
+    end
+
+    cleaned_results = clean_results(parse_results)
+    cleaned_results
+  end
+
+#a method to get rid of the boring and duplicate results
+  def self.clean_results(parse_results)
+    parse_results.delete_if {|x| !(x[0].include?(" ") )}
+    #Get rid of results with a phrase shorter than another phrase in parse_results
+    #Get rid of results with a phrase already included in cleaned_results
+    #I could use i and j, and include a parse_result i only if its phrase
+    #  is not contained within any other parse_result's phrase, 
+    #and if i's and j's phrase is the same, then only include if i is less than j
+    cleaned_results = []
+    0.upto(parse_results.size-1) do |i|
+      is_non_duplicate_result = true
+      current_result = parse_results[i]
+      current_result_phrase = parse_results[i][0]
+      0.upto(parse_results.size-1) do |j|
+        next if i == j
+        other_result_phrase = parse_results[j][0]
+        if current_result_phrase == other_result_phrase and i > j #Identical phrases, current result not the first one
+          is_non_duplicate_result = false
+          break
+        end
+        if other_result_phrase.size > current_result_phrase.size and other_result_phrase.include?(current_result_phrase)
+          is_non_duplicate_result = false
+          break
+        end
+      end
+      if is_non_duplicate_result
+        cleaned_results << current_result
+      end
+    end 
+    cleaned_results
+  end
+
+
+end

@@ -1,0 +1,28 @@
+<% unless @errors.blank? %>
+  <ul>
+  <% for error in @errors %>
+    <li><p><%= h(error) %></p></li>
+  <% end %>
+  </ul>
+<% end %>
+
+<H1>The Weather In London</H1>
+
+<H2>Submit text</H2>
+<% form_tag(:action => :read) do %>
+  <%= text_area_tag(:document_text, params[:document_text], :cols=> 50, :rows=> 10) %><br />
+  <%= submit_tag("Submit text") %>
+<% end %>
+
+<% if request.post? and @errors.blank? %>
+  <H2>Matches found</H2>
+
+  <ul>
+  <% @parse_results.each do |parse_result| %>
+    <li><a href="<%= parse_result[1].get_uri %>"><%= h(parse_result[0]) %></a></li>
+  <% end %>
+  </ul>
+
+  <H1>Original text</H1>
+    <%= h(params[:document_text]).gsub("\n","<br />\n") %>
+<% end %>

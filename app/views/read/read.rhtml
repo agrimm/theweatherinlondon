@@ -9,6 +9,9 @@
 <H1>The Weather In London</H1>
 
 <H2>Submit text</H2>
+
+<p>(Maximum <%= Article.maximum_allowed_document_size %> words)</p>
+
 <% form_tag(:action => :read) do %>
   <%= text_area_tag(:document_text, params[:document_text], :cols=> 50, :rows=> 10) %><br />
   <%= submit_tag("Submit text") %>

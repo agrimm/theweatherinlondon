@@ -1,6 +1,12 @@
 class Article < ActiveRecord::Base
   validates_presence_of :title
 
+  #Return the maximum length a document should be, to avoid server resource issues
+  def self.maximum_allowed_document_size
+    50
+  end
+
+  #If a URI exists, return it, else dynamically generate it from the article title
   def get_uri
     unless self.uri == nil
       return self.uri
@@ -24,7 +30,7 @@ class Article < ActiveRecord::Base
     boring_words = %w{a and also are be been for get has in is just me of on only see than this the there was january february march april may june july august september october november december}
     number_non_boring_words = 0
     words.each do |word|
-      number_non_boring_words += 1 unless boring_words.include?(word.downcase)
+      number_non_boring_words += 1 unless boring_words.include?(word.chars.downcase)
     end
     return true unless number_non_boring_words > 1
   end
@@ -33,16 +39,16 @@ class Article < ActiveRecord::Base
   #Probably should only return one article, but return an array just in case
   def self.find_matching_articles(phrase)
     return [] if phrase_is_boring?(phrase)
-    articles = find(:all, :conditions => ["title = ?", phrase])
+    articles = find(:all, :conditions => ["title = ?", phrase], :limit => 1)
     articles
   end
 
   #Informs the caller if they should try a longer phrase than the current one in order to get a match
   def self.try_longer_phrase?(phrase)
-    if phrase.length < 6 or phrase_is_boring?(phrase)
+    if phrase_is_boring?(phrase)
       return true #Otherwise it chews up too much server time
     end
-    potentially_matching_articles = find(:all, :conditions => ["title like ?", phrase + "%"], :limit=>2)
+    potentially_matching_articles = find(:all, :conditions => ["title like ?", phrase + "%"], :limit=>1)
     return !potentially_matching_articles.empty?
   end
 
@@ -51,6 +57,7 @@ class Article < ActiveRecord::Base
   def self.parse_text_document(document_text)
     parse_results = []
     words = break_up_phrase(document_text)
+    raise(ArgumentError, "Document has too many words") if words.size > maximum_allowed_document_size
     i = 0
     while(true)
       j = 0
@@ -75,14 +82,11 @@ class Article < ActiveRecord::Base
     cleaned_results
   end
 
-#a method to get rid of the boring and duplicate results
+  #a method to get rid of the duplicate results
   def self.clean_results(parse_results)
     parse_results.delete_if {|x| !(x[0].include?(" ") )}
     #Get rid of results with a phrase shorter than another phrase in parse_results
     #Get rid of results with a phrase already included in cleaned_results
-    #I could use i and j, and include a parse_result i only if its phrase
-    #  is not contained within any other parse_result's phrase, 
-    #and if i's and j's phrase is the same, then only include if i is less than j
     cleaned_results = []
     0.upto(parse_results.size-1) do |i|
       is_non_duplicate_result = true
@@ -106,6 +110,5 @@ class Article < ActiveRecord::Base
     end 
     cleaned_results
   end
-
 
 end

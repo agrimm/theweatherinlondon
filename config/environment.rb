@@ -5,7 +5,7 @@
 # ENV['RAILS_ENV'] ||= 'production'
 
 # Specifies gem version of Rails to use when vendor/rails is not present
-RAILS_GEM_VERSION = '1.2.3' unless defined? RAILS_GEM_VERSION
+RAILS_GEM_VERSION = '2.0.2' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -30,6 +30,11 @@ Rails::Initializer.run do |config|
   # (create the session table with 'rake db:sessions:create')
   # config.action_controller.session_store = :active_record_store
 
+  config.action_controller.session = {
+   :session_key => '_theweatherinlondon_session',
+   :secret   =>   'notverysecretifitsinsubversionisit5757237e5524c971b8474d24e5563774e5cf2e3ea10af16da592df1ee73d13c6e4338114d0bae953bb4f3462bf90786c9d6ce5ae592071cad8d99a7bbbb11544'
+  } 
+
   # Use SQL instead of Active Record's schema dumper when creating the test database.
   # This is necessary if your schema can't be completely dumped by the schema dumper, 
   # like if you have constraints or database-specific column types
@@ -42,6 +47,8 @@ Rails::Initializer.run do |config|
   # config.active_record.default_timezone = :utc
   
   # See Rails::Configuration for more options
+
+
 end
 
 # Add new inflection rules using the following format 
@@ -58,3 +65,4 @@ end
 # Mime::Type.register "application/x-mobile", :mobile
 
 # Include your application configuration below
+

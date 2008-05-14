@@ -29,3 +29,15 @@
   <H1>Original text</H1>
     <%= h(params[:document_text]).gsub("\n","<br />\n") %>
 <% end %>
+
+<H2>How to use The Weather in London</H2>
+
+<p>The Weather in London provides a new kind of search. It allows people to submit a block of text, and see which phrases in it correspond to pages on a specific web site.</p>
+
+<p>For example, if you submitted</p>
+
+<blockquote>Launch Complex 40 (LC-40) at the Cape Canaveral Air Force Station, Merritt Island, Florida has been demolished. The Mobile Service Structure (MSS), which was once used to load payloads onto Titan III and Titan IV rockets, was toppled by explosive charges at 13:00 GMT.</blockquote>
+
+<p>you would discover that Wikipedia has articles on Launch Complex, Cape Canaveral Air Force Station, Merritt Island, Titan III and Titan IV.</p>
+
+<p>Currently, only phrases of words are checked, rather than single words to reduce clutter.</p>

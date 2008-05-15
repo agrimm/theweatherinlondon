@@ -4,7 +4,7 @@ class Article < ActiveRecord::Base
 
   #Return the maximum length a document should be, to avoid server resource issues
   def self.maximum_allowed_document_size
-    500
+    15000
   end
 
   #If a URI exists, return it, else dynamically generate it from the article title

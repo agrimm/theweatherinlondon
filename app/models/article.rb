@@ -1,9 +1,10 @@
 class Article < ActiveRecord::Base
   validates_presence_of :title
+  belongs_to :repository
 
   #Return the maximum length a document should be, to avoid server resource issues
   def self.maximum_allowed_document_size
-    50
+    500
   end
 
   #If a URI exists, return it, else dynamically generate it from the article title
@@ -11,9 +12,7 @@ class Article < ActiveRecord::Base
     unless self.uri == nil
       return self.uri
     else 
-      require 'uri'
-      underscored_title = title.gsub(" ", "_")
-      return URI.escape("http://en.wikipedia.org/wiki/" + underscored_title)
+      return repository.generate_uri(title)
     end
   end
 
@@ -37,24 +36,24 @@ class Article < ActiveRecord::Base
 
   #Return all articles that match the requested phrase
   #Probably should only return one article, but return an array just in case
-  def self.find_matching_articles(phrase)
+  def self.find_matching_articles(phrase, repository)
     return [] if phrase_is_boring?(phrase)
-    articles = find(:all, :conditions => ["title = ?", phrase], :limit => 1)
+    articles = find(:all, :conditions => ["title = ? and repository_id = ?", phrase, repository], :limit => 1)
     articles
   end
 
   #Informs the caller if they should try a longer phrase than the current one in order to get a match
-  def self.try_longer_phrase?(phrase)
+  def self.try_longer_phrase?(phrase, repository)
     if phrase_is_boring?(phrase)
       return true #Otherwise it chews up too much server time
     end
-    potentially_matching_articles = find(:all, :conditions => ["title like ?", phrase + "%"], :limit=>1)
+    potentially_matching_articles = find(:all, :conditions => ["title like ? and repository_id = ?", phrase + "%", repository], :limit=>1)
     return !potentially_matching_articles.empty?
   end
 
   #Read in a document, and return an array of phrases and their matching articles
   #Strategy: split into words, then iterate through the words
-  def self.parse_text_document(document_text)
+  def self.parse_text_document(document_text, repository)
     parse_results = []
     words = break_up_phrase(document_text)
     raise(ArgumentError, "Document has too many words") if words.size > maximum_allowed_document_size
@@ -63,12 +62,12 @@ class Article < ActiveRecord::Base
       j = 0
       phrase = words[i + j]
       while(true)
-        matching_articles = find_matching_articles(phrase)
+        matching_articles = find_matching_articles(phrase, repository)
         matching_articles.each do |matching_article|
           parse_results << [phrase, matching_article]
         end
   
-        break unless (try_longer_phrase?(phrase) and i + j + 1 < words.size)
+        break unless (try_longer_phrase?(phrase, repository) and i + j + 1 < words.size)
         j = j + 1
         phrase += " "
         phrase += words[i + j]

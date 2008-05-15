@@ -13,8 +13,12 @@
 <p>(Maximum <%= Article.maximum_allowed_document_size %> words)</p>
 
 <% form_tag(:action => :read) do %>
-  <%= text_area_tag(:document_text, params[:document_text], :cols=> 50, :rows=> 10) %><br />
-  <%= submit_tag("Submit text") %>
+<table>
+<tr><td colspan=2> <%= text_area_tag(:document_text, params[:document_text], :cols=> 80, :rows=> 10) %></td></tr>
+<tr><td>Web site:</td>
+<td><%= select_tag "repository_id", options_for_select(@repository_choices) %></td></tr>
+<tr><td>  <%= submit_tag("Submit text") %> </td><td></td></tr>
+</table>
 <% end %>
 
 <% if request.post? and @errors.blank? %>
@@ -32,12 +36,14 @@
 
 <H2>How to use The Weather in London</H2>
 
-<p>The Weather in London provides a new kind of search. It allows people to submit a block of text, and see which phrases in it correspond to pages on a specific web site.</p>
+<p>The Weather in London provides a different kind of search. It allows people to submit a block of text, and see which phrases in it correspond to pages on a specific web site.</p>
 
-<p>For example, if you submitted</p>
+<p>For example, if you submitted <a href="http://en.wikinews.org/wiki/Last_Titan_launch_complex_at_Cape_Canaveral_demolished">this block of text</a></p>
 
 <blockquote>Launch Complex 40 (LC-40) at the Cape Canaveral Air Force Station, Merritt Island, Florida has been demolished. The Mobile Service Structure (MSS), which was once used to load payloads onto Titan III and Titan IV rockets, was toppled by explosive charges at 13:00 GMT.</blockquote>
 
 <p>you would discover that Wikipedia has articles on Launch Complex, Cape Canaveral Air Force Station, Merritt Island, Titan III and Titan IV.</p>
 
-<p>Currently, only phrases of words are checked, rather than single words to reduce clutter.</p>
+<p>You can also choose to see if a block of text contains a person or electorate in the <a href="http://en.wikipedia.org/wiki/Australian_House_of_Representatives">Australian House of Representatives</a>. This is possibly of marginal utility, but is an example of this concept not just applying for wikis.</p>
+
+<p>Currently, only phrases with more than one non-trivial word are checked, rather than single words, to reduce clutter.</p>

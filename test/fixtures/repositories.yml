@@ -1,7 +1,7 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-# one:
-#   column: value
-#
-# two:
-#   column: value
+#An uncyclopedia language that does not yet exist
+Afrikaans_uncyclopedia:
+  id: 1
+  abbreviation: af-uncyclopedia
+  short_description: "Afrikaans Uncyclopedia"

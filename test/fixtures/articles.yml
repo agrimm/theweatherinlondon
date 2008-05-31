@@ -1,5 +1,13 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-one:
+
+Maria Theresa of Austria:
   id: 1
-two:
+  uri: http://af.uncyclopedia.wikia.com/wiki/Maria_Theresa_of_Austria
+  title: Maria Theresa of Austria
+  repository_id: 1
+
+Maria Theresa:
   id: 2
+  uri: http://af.uncyclopedia.wikia.com/wiki/Maria_Theresa
+  title: Maria Theresa
+  repository_id: 1

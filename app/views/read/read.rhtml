@@ -14,9 +14,11 @@
 
 <% form_tag(:action => :read) do %>
 <table>
-<tr><td colspan=2> <%= text_area_tag(:document_text, params[:document_text], :cols=> 80, :rows=> 10) %></td></tr>
+<tr><td colspan=2> <%= text_area_tag(:document_text, h(params[:document_text]), :cols=> 80, :rows=> 10) %></td></tr>
 <tr><td>Web site:</td>
 <td><%= select_tag "repository_id", options_for_select(@repository_choices) %></td></tr>
+<tr><td>Markup (if any)</td>
+<td><%= select_tag "markup", options_for_select(@markup_choices) %></td></tr>
 <tr><td>  <%= submit_tag("Submit text") %> </td><td></td></tr>
 </table>
 <% end %>

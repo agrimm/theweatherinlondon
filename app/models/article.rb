@@ -16,6 +16,27 @@ class Article < ActiveRecord::Base
     end
   end
 
+  #If the article is a redirect, return the redirect target, else return nil
+  def redirect_target
+    if defined?(@redirect_target)
+      @redirect_target
+    else
+      results = Article.find_by_sql(["select articles.* from articles, redirects where redirects.redirect_source_repository_id = ? and redirects.redirect_source_local_id = ? and BINARY redirects.redirect_target_title = articles.title and redirects.redirect_source_repository_id = articles.repository_id", repository_id, local_id])
+      raise "Can't happen case #{repository_id.to_s + " " + local_id.to_s} #{results.inject(""){|str, result| str + result.title + " " + result.repository_id.to_s} }" if results.size > 1
+      @redirect_target = results.first
+    end
+  end
+
+  def redirect_sources
+    if defined?(@redirect_sources)
+      @redirect_sources
+    else
+      #Table articles currently isn't indexed by repository_id and local_id, nor is table redirects indexed by redirect_target_title, so this would currently be slow
+      @redirect_sources = Article.find_by_sql(["select articles.* from articles, redirects where BINARY redirects.redirect_target_title = ? and redirects.redirect_source_repository_id = ? and redirects.redirect_source_repository_id = articles.repository_id and redirects.redirect_source_local_id = articles.local_id", title, repository_id])
+    end
+  end
+
+
   def self.break_up_phrase(phrase)
     words = phrase.split(/[[:space:],.""'']+/)
     words
@@ -99,10 +120,12 @@ class Article < ActiveRecord::Base
   end
 
   #a method to get rid of the duplicate results
+  #to do: remove any results here that are redirects to existing wikified results
   def self.clean_results(parse_results)
-    parse_results.delete_if {|x| !(x[0].include?(" ") )} #This line may be redundant
+    #parse_results.delete_if {|x| !(x[0].include?(" ") )} #This line may be redundant
     #Get rid of results with a phrase shorter than another phrase in parse_results
     #Get rid of results with a phrase already included in cleaned_results
+    parse_results.uniq!
     cleaned_results = []
     0.upto(parse_results.size-1) do |i|
       is_non_duplicate_result = true
@@ -111,10 +134,10 @@ class Article < ActiveRecord::Base
       0.upto(parse_results.size-1) do |j|
         next if i == j
         other_result_phrase = parse_results[j][0]
-        if current_result_phrase == other_result_phrase and i > j #Identical phrases, current result not the first one
-          is_non_duplicate_result = false
-          break
-        end
+        #if current_result_phrase == other_result_phrase and i > j #Identical phrases, current result not the first one
+        #  is_non_duplicate_result = false
+        #  break
+        #end
         if other_result_phrase.size > current_result_phrase.size and other_result_phrase.include?(current_result_phrase)
           is_non_duplicate_result = false
           break
@@ -124,6 +147,12 @@ class Article < ActiveRecord::Base
         cleaned_results << current_result
       end
     end 
+
+    cleaned_results.delete_if do |phrase, matching_article|
+      cleaned_results.any? do |other_phrase, other_article|
+        matching_article.redirect_target == other_article
+      end
+    end
     cleaned_results
   end
 

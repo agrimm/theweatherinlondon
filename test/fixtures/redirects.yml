@@ -1,0 +1,7 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+redirect_1:
+  redirect_source_repository_id: 1
+  redirect_source_local_id: 8
+  redirect_target_title: Maria Theresa of Austria
+

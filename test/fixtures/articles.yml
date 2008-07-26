@@ -5,9 +5,59 @@ Maria Theresa of Austria:
   uri: http://af.uncyclopedia.wikia.com/wiki/Maria_Theresa_of_Austria
   title: Maria Theresa of Austria
   repository_id: 1
+  local_id: 1
 
 Maria Theresa:
   id: 2
   uri: http://af.uncyclopedia.wikia.com/wiki/Maria_Theresa
   title: Maria Theresa
   repository_id: 1
+  local_id: 2
+
+#ASCII, multiple capital letters
+UAE in English:
+  id: 3
+  uri: http://en.wikipedia.org/wiki/United_Arab_Emirates
+  title: United Arab Emirates
+  repository_id: 1
+  local_id: 3
+
+#ASCII, only one capital letter
+Prime minister:
+  id: 4
+  uri: http://en.wikipedia.org/wiki/Prime_minister
+  title: Prime minister
+  repository_id: 1
+  local_id: 4
+
+#Accented letter
+Internet cafe:
+  id: 5
+  uri: http://en.wikipedia.org/wiki/Internet_caf%C3%A9
+  title: Internet caf<%= "\xc3\xa9"%>
+  repository_id: 1
+  local_id: 5
+
+#Arabic for internet cafe (I think)
+Arabic internet cafe:
+  id: 6
+  uri: http://ar.wikipedia.org/wiki/%D9%85%D9%82%D9%87%D9%89_%D8%A5%D9%86%D8%AA%D8%B1%D9%86%D8%AA
+  title: <%= "\xD9\x85\xD9\x82\xD9\x87\xD9\x89 \xD8\xA5\xD9\x86\xD8\xAA\xD8\xB1\xD9\x86\xD8\xAA"%>
+  repository_id: 1
+  local_id: 6
+
+#Reversed string for internet cafe (I think)
+Reversed arabic internet cafe:
+  id: 7
+  uri: http://www.example.com/arabic_internet_cafe_reversed
+  title: <%= "\xD8\xAA\xD9\x86\xD8\xB1\xD8\xAA\xD9\x86\xD8\xA5 \xD9\x89\xD9\x87\xD9\x82\xD9\x85"%>
+  repository_id: 1
+  local_id: 7
+
+#Obviously a typo
+Maria Thesa ov Austria:
+  id: 8
+  uri: http://af.uncyclopedia.wikia.com/wiki/Maria_Theresa_ov_Austria
+  title: Maria Theresa ov Austria
+  repository_id: 1
+  local_id: 8

@@ -4,8 +4,8 @@ class Repository < ActiveRecord::Base
   def generate_uri(article_title)
     require 'uri'
     underscored_title = article_title.gsub(" ", "_")
-    if (short_description == "English Wikipedia")
-      return URI.escape("http://en.wikipedia.org/wiki/" + underscored_title)
+    if (abbreviation =~ /(.*)wiki/)
+      return URI.escape("http://"+$1+".wikipedia.org/wiki/" + underscored_title)
     else
       raise "Unknown repository!"
     end

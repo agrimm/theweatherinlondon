@@ -5,6 +5,10 @@ class ArticleTest < Test::Unit::TestCase
   fixtures :repositories
   fixtures :redirects
 
+  def setup
+    @empty_document = Document.new("", Repository.find(:first), "auto-detect")
+  end
+
   # Replace this with your real tests.
   def test_truth
     assert true
@@ -98,25 +102,25 @@ class ArticleTest < Test::Unit::TestCase
     syntax_test_pairs.each do |syntax_test_pair|
       unparsed_text = syntax_test_pair[0]
       parsed_text = syntax_test_pair[1]
-      assert_equal parsed_text, Article.send(method_symbol, unparsed_text)
+      assert_equal parsed_text, @empty_document.send(method_symbol, unparsed_text)
     end
   end
 
   def test_parse_existing_wiki_links
     wiki_text = "The rain in [[London]] is quite [[London#climate|wet]]"
-    assert_equal ["London"], Article.parse_existing_wiki_links(wiki_text)
+    assert_equal ["London"], @empty_document.parse_existing_wiki_links(wiki_text)
   end
 
   def test_nested_templates
     wiki_text = "abc {{def {{ghi}} jkl}} mno"
-    assert_equal "abc  mno", Article.parse_templates(wiki_text)
+    assert_equal "abc  mno", @empty_document.parse_templates(wiki_text)
   end
 
   def test_trickier_non_direct_links
     wiki_texts = ["start [[Image:wiki.png]]finish", "start[[Image:wiki.png|The logo of this [[wiki]]]] finish", "start[[:Image:wiki.png|The logo of this [[wiki]], which is the English Wikipedia]] finish"]
     wiki_texts.each do |wiki_text|
-      assert_equal "start finish", Article.parse_non_direct_links(wiki_text)
-      assert_equal "start finish", Article.parse_wiki_text(wiki_text)
+      assert_equal "start finish", @empty_document.parse_non_direct_links(wiki_text)
+      assert_equal "start finish", @empty_document.parse_wiki_text(wiki_text)
     end
   end
 
@@ -125,7 +129,7 @@ class ArticleTest < Test::Unit::TestCase
     original_document_text = document_text.dup
     repository = Repository.find_by_abbreviation("af-uncyclopedia")
     markup = "auto-detect"
-    Article.parse_text_document(document_text, repository, markup)
+    parse_text_document(document_text, repository, markup)
     assert_equal document_text, original_document_text
   end
 
@@ -143,7 +147,7 @@ class ArticleTest < Test::Unit::TestCase
     document_text_results_pairs.each do |document_text_results_pair|
       document_text = document_text_results_pair[0]
       expected_results = document_text_results_pair[1]
-      results = Article.parse_text_document(document_text, repository, markup)
+      results = parse_text_document(document_text, repository, markup)
       assert_equal expected_results, results
     end
   end
@@ -155,7 +159,7 @@ class ArticleTest < Test::Unit::TestCase
     phrases = ["United Arab Emirates", "Prime minister", "Internet caf\xc3\xa9", "\xD9\x85\xD9\x82\xD9\x87\xD9\x89 \xD8\xA5\xD9\x86\xD8\xAA\xD8\xB1\xD9\x86\xD8\xAA", "\xD8\xAA\xD9\x86\xD8\xB1\xD8\xAA\xD9\x86\xD8\xA5 \xD9\x89\xD9\x87\xD9\x82\xD9\x85"]
     phrases.each do |phrase|
       document_text = phrase
-      results = Article.parse_text_document(document_text, repository, markup)
+      results = parse_text_document(document_text, repository, markup)
       assert_equal 1, results.size, "Problem parsing #{phrase}"
     end
   end
@@ -185,9 +189,14 @@ class ArticleTest < Test::Unit::TestCase
     document_text_results_pairs << ["#{misspelled_article.title} #{correct_article.title}", [ [correct_article.title, correct_article] ] ]
     #document_text_results_pairs << ["[[#{correct_article.title}]] : #{misspelled_article.title} was born in", [  ] ] #This one should fail right now
     document_text_results_pairs.each do |document_text, expected_results|
-      actual_results = Article.parse_text_document(document_text, repository, markup)
+      actual_results = parse_text_document(document_text, repository, markup)
       assert_equal expected_results, actual_results
     end
+  end
+
+  def parse_text_document(document_text, repository, markup)
+    document = Article.new_document(document_text, repository, markup)
+    return document.parse
   end
 
 end

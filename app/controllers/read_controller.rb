@@ -20,10 +20,11 @@ class ReadController < ApplicationController
       end
       if @errors.empty?
         begin
-          @parse_results = Article.parse_text_document(document_text, repository, markup)
+          document = Article.new_document(document_text, repository, markup)
+          @parse_results = document.parse
         rescue ArgumentError => error
           if error.message == "Document has too many words"
-            @errors << "Please submit a text fewer than #{Article.maximum_allowed_document_size} words long" 
+            @errors << "Please submit a text fewer than #{Repository.maximum_allowed_document_size} words long" 
           else
             raise
           end

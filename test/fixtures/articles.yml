@@ -61,3 +61,20 @@ Maria Thesa ov Austria:
   title: Maria Theresa ov Austria
   repository_id: 1
   local_id: 8
+
+#Singular
+Running back:
+  id: 9
+  uri: http://en.wikipedia.org/wiki/Running_back
+  title: Running back
+  repository_id: 1
+  local_id: 9
+
+#Plural
+Running backs:
+  id: 10
+  uri: http://en.wikipedia.org/wiki/Running_backs
+  title: Running backs
+  repository_id: 1
+  local_id: 10
+

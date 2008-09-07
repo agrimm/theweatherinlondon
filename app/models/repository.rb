@@ -20,8 +20,8 @@ class Repository < ActiveRecord::Base
   end
 
   #Determine if a phrase is boring
-  #That is, it has one or zero non-boring words
-  #  and that the wiki text doesn't already link to it (if applicable)
+  #Currently, it is expected by contract to deem as boring any phrases with no or one boring words
+  #As a convenience to the calling method, it may deem as boring any phrases that have already been found, but it is not part of the contract, and it won't take into account redirects
   def phrase_is_boring?(phrase, existing_article_titles)
     #if existing_article_titles.any?{|existing_article_title| existing_article_title.chars.downcase.to_s.include?(phrase.chars.downcase)} #Unicode safe, too slow? :(
     if existing_article_titles.any?{|existing_article_title| existing_article_title.downcase.include?(phrase.downcase)} #Not unicode safe?

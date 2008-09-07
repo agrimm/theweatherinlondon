@@ -71,7 +71,7 @@ class Document
         break unless @repository.try_longer_phrase?(phrase, @existing_article_titles)
       end
     end
-    parse_results = clean_results(parse_results)
+    parse_results = clean_results(parse_results, @existing_article_titles)
   end
 
   #Determine if the text is in some sort of markup
@@ -149,7 +149,7 @@ class Document
     parsed_wiki_article_titles = []
     unparsed_match_arrays.each do |unparsed_match_array|
       unparsed_title = unparsed_match_array.first
-      parsed_title = unparsed_title.gsub(/_+/, " ")
+      parsed_title = unparsed_title.gsub(/_+/, " ") #This line is not heckle-proof
       parsed_wiki_article_titles << parsed_title
     end
     parsed_wiki_article_titles.uniq
@@ -161,8 +161,8 @@ class Document
   end
 
   #a method to get rid of the duplicate results
-  #to do: remove any results here that are redirects to existing wikified results
-  def clean_results(parse_results)
+  #to do: refactor this code
+  def clean_results(parse_results, existing_article_titles)
     #parse_results.delete_if {|x| !(x[0].include?(" ") )} #This line may be redundant
     #Get rid of results with a phrase shorter than another phrase in parse_results
     #Get rid of results with a phrase already included in cleaned_results
@@ -192,6 +192,11 @@ class Document
     cleaned_results.delete_if do |phrase, matching_article|
       cleaned_results.any? do |other_phrase, other_article|
         matching_article.redirect_target == other_article
+      end
+    end
+    cleaned_results.delete_if do |phrase, matching_article|
+      existing_article_titles.any? do |article_title|
+        (matching_article.redirect_target and matching_article.redirect_target.title.downcase == article_title.downcase) #Not unicode safe?
       end
     end
     cleaned_results

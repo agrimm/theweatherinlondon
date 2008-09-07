@@ -5,3 +5,8 @@ redirect_1:
   redirect_source_local_id: 8
   redirect_target_title: Maria Theresa of Austria
 
+running_backs_redirect:
+  redirect_source_repository_id: 1
+  redirect_source_local_id: 10
+  redirect_target_title: Running back
+

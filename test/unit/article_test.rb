@@ -7,6 +7,8 @@ class ArticleTest < Test::Unit::TestCase
 
   def setup
     @empty_document = Document.new("", Repository.find(:first), "auto-detect")
+    @af_uncyclopedia = Repository.find_by_abbreviation("af-uncyclopedia")
+    @auto_detect = "auto-detect"
   end
 
   # Replace this with your real tests.
@@ -184,14 +186,34 @@ class ArticleTest < Test::Unit::TestCase
     misspelled_article = Article.find_by_title("Maria Theresa ov Austria")
     correct_article = Article.find_by_title("Maria Theresa of Austria")
     document_text_results_pairs = []
-    document_text_results_pairs << [misspelled_article.title, [ [misspelled_article.title, misspelled_article] ] ]
-    document_text_results_pairs << [correct_article.title, [ [correct_article.title, correct_article] ] ]
-    document_text_results_pairs << ["#{misspelled_article.title} #{correct_article.title}", [ [correct_article.title, correct_article] ] ]
-    #document_text_results_pairs << ["[[#{correct_article.title}]] : #{misspelled_article.title} was born in", [  ] ] #This one should fail right now
+    document_text_results_pairs << [misspelled_article.title, [ [misspelled_article.title, misspelled_article] ] ] #Just checking the misspelled article exists
+    document_text_results_pairs << [correct_article.title, [ [correct_article.title, correct_article] ] ] #Just checking the correctly spelled article exists
+    document_text_results_pairs << ["#{misspelled_article.title} #{correct_article.title}", [ [correct_article.title, correct_article] ] ] #If both are unwikified, assert only the correct spelling is wikified
+    document_text_results_pairs << ["[[#{correct_article.title}]] : #{misspelled_article.title} was born in", [  ] ] #If the correct spelling is wikified, don't wikify the incorrect spelling
     document_text_results_pairs.each do |document_text, expected_results|
       actual_results = parse_text_document(document_text, repository, markup)
       assert_equal expected_results, actual_results
     end
+  end
+
+  #Given a wikified singular, and an unwikified plural, assert that the plural is not detected as a result
+  #This test is identical to test_redirect_cleaning except it uses lower cases
+  def test_detect_redirected_plurals
+    document_text = "a [[running back]] amongst running backs"
+    expected_results = []
+    actual_results = parse_text_document(document_text, @af_uncyclopedia, @auto_detect)
+    assert_equal expected_results, actual_results, "Problem with redirects"
+  end
+
+  def test_handles_articles_without_redirect_targets
+    maria_theresa_article = Article.find_by_title("Maria Theresa of Austria")
+    document_text = "a [[running back]] amongst running backs was #{maria_theresa_article.title}"
+    expected_results = [ [maria_theresa_article.title, maria_theresa_article] ]
+    actual_results = nil
+    assert_nothing_raised do
+      actual_results = parse_text_document(document_text, @af_uncyclopedia, @auto_detect)
+    end
+    assert_equal expected_results, actual_results
   end
 
   def parse_text_document(document_text, repository, markup)

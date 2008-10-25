@@ -64,14 +64,25 @@ class Document
     0.upto(@words.size - 1) do |i|
       i.upto(@words.size - 1) do |j|
         phrase = @words[i..j].join(" ")
-        matching_articles = @repository.find_matching_articles(phrase, @existing_article_titles)
-        matching_articles.each do |matching_article|
-          parse_results << [phrase, matching_article]
+        unless phrase_has_definitely_been_checked?(phrase, @existing_article_titles)
+          matching_articles = @repository.find_matching_articles(phrase)
+          matching_articles.each do |matching_article|
+            parse_results << [phrase, matching_article]
+          end
+          break unless @repository.try_longer_phrase?(phrase)
         end
-        break unless @repository.try_longer_phrase?(phrase, @existing_article_titles)
       end
     end
     parse_results = clean_results(parse_results, @existing_article_titles)
+  end
+
+  #Return true only if the phrase has checked or wikified
+  #Returning false is not a contract violation under any circumstance
+  #To do: returning false can cause a unit test to fail. This indicates that other parts of the program are relying on uncontracted behaviour.
+  def phrase_has_definitely_been_checked?(phrase, existing_article_titles)
+    #return false #This causes unit tests to fail
+    #return existing_article_titles.any?{|existing_article_title| existing_article_title.chars.downcase.to_s.include?(phrase.chars.downcase)} #Unicode safe, too slow? :(
+    return existing_article_titles.any?{|existing_article_title| existing_article_title.downcase.include?(phrase.downcase)} #Not unicode safe?
   end
 
   #Determine if the text is in some sort of markup

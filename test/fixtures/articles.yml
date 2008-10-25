@@ -78,3 +78,11 @@ Running backs:
   repository_id: 1
   local_id: 10
 
+#A boring title
+The the:
+  id: 11
+  uri: http://af.uncyclopedia.wikia.com/wiki/The_the
+  title: The the
+  repository_id: 1
+  local_id: 11
+

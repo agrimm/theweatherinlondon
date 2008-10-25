@@ -221,4 +221,11 @@ class ArticleTest < Test::Unit::TestCase
     return document.parse
   end
 
+  def test_ignore_boring_phrases
+    document_text = "the the the the the the"
+    expected_results = []
+    actual_results = parse_text_document(document_text, @af_uncyclopedia, @auto_detect)
+    assert_equal expected_results, actual_results
+  end
+
 end

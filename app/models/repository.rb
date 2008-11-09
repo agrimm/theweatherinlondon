@@ -20,11 +20,9 @@ class Repository < ActiveRecord::Base
   end
 
   #Determine if a phrase is boring
-  #Currently, it is expected by contract to deem as boring any phrases with no or one boring words
-  #As a convenience to the calling method, it may deem as boring any phrases that have already been found, but it is not part of the contract, and it won't take into account redirects
+  #Currently, it deems as boring any phrases with no or one boring words
   def phrase_is_boring?(phrase)
     words = break_up_phrase(phrase)
-    #count how many words are non-boring
     boring_words = %w{a and also are be been for get has in is just me of on only see than this the there was january february march april may june july august september october november december}
     number_non_boring_words = 0
     words.each do |word|

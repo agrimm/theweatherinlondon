@@ -172,45 +172,46 @@ class Document
   end
 
   #a method to get rid of the duplicate results
-  #to do: refactor this code
   def clean_results(parse_results, existing_article_titles)
-    #parse_results.delete_if {|x| !(x[0].include?(" ") )} #This line may be redundant
-    #Get rid of results with a phrase shorter than another phrase in parse_results
-    #Get rid of results with a phrase already included in cleaned_results
-    parse_results.uniq!
-    cleaned_results = []
-    0.upto(parse_results.size-1) do |i|
-      is_non_duplicate_result = true
-      current_result = parse_results[i]
-      current_result_phrase = parse_results[i][0]
-      0.upto(parse_results.size-1) do |j|
-        next if i == j
-        other_result_phrase = parse_results[j][0]
-        #if current_result_phrase == other_result_phrase and i > j #Identical phrases, current result not the first one
-        #  is_non_duplicate_result = false
-        #  break
-        #end
-        if other_result_phrase.size > current_result_phrase.size and other_result_phrase.include?(current_result_phrase)
-          is_non_duplicate_result = false
-          break
-        end
-      end
-      if is_non_duplicate_result
-        cleaned_results << current_result
-      end
-    end 
+    cleaned_results = clean_results_of_partial_phrases(parse_results)
+    cleaned_results = clean_results_of_redirects_to_detected_articles(cleaned_results)
+    cleaned_results = clean_results_of_redirects_to_wikified_titles(cleaned_results, existing_article_titles)
+    cleaned_results
+  end
 
-    cleaned_results.delete_if do |phrase, matching_article|
-      cleaned_results.any? do |other_phrase, other_article|
+  #Get rid of results with a phrase shorter than another phrase in parse_results
+  def clean_results_of_partial_phrases(results)
+    cleaned_results = []
+    results.each do |current_result|
+      current_result_phrase = current_result[0]
+
+      cleaned_results << current_result unless results.any? do |other_result|
+        other_result_phrase = other_result[0]
+        is_a_partial_string?(other_result_phrase, current_result_phrase)
+      end
+    end
+    cleaned_results 
+  end
+
+  #is potentially_partial_string a substring of (but not the whole of) containing_string?
+  def is_a_partial_string?(containing_string, potentially_partial_string)
+    return (containing_string.size > potentially_partial_string.size and containing_string.include?(potentially_partial_string) )
+  end
+
+  def clean_results_of_redirects_to_detected_articles(results)
+    results.delete_if do |phrase, matching_article|
+      results.any? do |other_phrase, other_article|
         matching_article.redirect_target == other_article
       end
     end
-    cleaned_results.delete_if do |phrase, matching_article|
-      existing_article_titles.any? do |article_title|
-        (matching_article.redirect_target and matching_article.redirect_target.title.downcase == article_title.downcase) #Not unicode safe?
-      end
+    results
+  end
+
+  def clean_results_of_redirects_to_wikified_titles(results, existing_article_titles)
+    results.delete_if do |phrase, matching_article|
+      (matching_article.redirect_target and existing_article_titles.any? {|article_title| matching_article.redirect_target.title.downcase == article_title.downcase}) #Not unicode safe?
     end
-    cleaned_results
+    results
   end
 
 end

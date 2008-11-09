@@ -160,7 +160,7 @@ class Document
     parsed_wiki_article_titles = []
     unparsed_match_arrays.each do |unparsed_match_array|
       unparsed_title = unparsed_match_array.first
-      parsed_title = unparsed_title.gsub(/_+/, " ") #This line is not heckle-proof
+      parsed_title = unparsed_title.gsub(/_+/, " ")
       parsed_wiki_article_titles << parsed_title
     end
     parsed_wiki_article_titles.uniq

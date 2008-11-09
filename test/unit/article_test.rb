@@ -216,6 +216,13 @@ class ArticleTest < Test::Unit::TestCase
     assert_equal expected_results, actual_results
   end
 
+  def test_handles_underscores_in_wikified_text
+    document_text = "I wish to underscore the fact that a [[running_back]] is a running back no matter what."
+    expected_results = []
+    actual_results = parse_text_document(document_text, @af_uncyclopedia, @auto_detect)
+    assert_equal expected_results, actual_results
+  end
+
   def parse_text_document(document_text, repository, markup)
     document = Article.new_document(document_text, repository, markup)
     return document.parse

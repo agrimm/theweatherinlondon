@@ -34,13 +34,12 @@ class Repository < ActiveRecord::Base
     return true unless number_non_boring_words > 1
   end
 
-  #Informs the caller if they should try a longer phrase than the current one in order to get a match
-  def try_longer_phrase?(phrase)
+  def try_this_phrase_or_longer?(phrase)
     if phrase_is_boring?(phrase)
       return true #Otherwise it chews up too much server time
     end
-    potentially_matching_articles = articles.find(:all, :conditions => ["title like ?", phrase + "%"], :limit=>1)
-    return ! potentially_matching_articles.empty?
+    potentially_matching_article = articles.find(:first, :conditions => ["title like ?", phrase + "%"])
+    return ! potentially_matching_article.nil?
   end
 
   #Todo: this method is also in article.rb, indicating a DRY violation

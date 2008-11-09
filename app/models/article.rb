@@ -65,11 +65,11 @@ class Document
       i.upto(@words.size - 1) do |j|
         phrase = @words[i..j].join(" ")
         unless phrase_has_definitely_been_checked?(phrase, @existing_article_titles)
+          break unless @repository.try_this_phrase_or_longer?(phrase)
           matching_articles = @repository.find_matching_articles(phrase)
           matching_articles.each do |matching_article|
             parse_results << [phrase, matching_article]
           end
-          break unless @repository.try_longer_phrase?(phrase)
         end
       end
     end

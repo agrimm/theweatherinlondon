@@ -53,22 +53,22 @@ class Document
       @parsed_document_text = document_text.dup
       @existing_article_titles = []
     end
-    @words = break_up_phrase(@parsed_document_text)
+    phrase = Phrase.build_from_document(@parsed_document_text)
+    @words = phrase.words
     raise(ArgumentError, "Document has too many words") if @words.size > Repository.maximum_allowed_document_size
   end
 
   #Read in a document, and return an array of phrases and their matching articles
-  #Strategy: split into words, then iterate through the words
   def parse
     parse_results = []
     0.upto(@words.size - 1) do |i|
       i.upto(@words.size - 1) do |j|
-        phrase = @words[i..j].join(" ")
+        phrase = Phrase.new(@words[i..j])
         unless phrase_has_definitely_been_checked?(phrase, @existing_article_titles)
           break unless @repository.try_this_phrase_or_longer?(phrase)
           matching_articles = @repository.find_matching_articles(phrase)
           matching_articles.each do |matching_article|
-            parse_results << [phrase, matching_article]
+            parse_results << [phrase.to_s, matching_article]
           end
         end
       end
@@ -80,9 +80,10 @@ class Document
   #Returning false is not a contract violation under any circumstance
   #To do: returning false can cause a unit test to fail. This indicates that other parts of the program are relying on uncontracted behaviour.
   def phrase_has_definitely_been_checked?(phrase, existing_article_titles)
+    phrase_string = phrase.to_s
     #return false #This causes unit tests to fail
-    #return existing_article_titles.any?{|existing_article_title| existing_article_title.chars.downcase.to_s.include?(phrase.chars.downcase)} #Unicode safe, too slow? :(
-    return existing_article_titles.any?{|existing_article_title| existing_article_title.downcase.include?(phrase.downcase)} #Not unicode safe?
+    #return existing_article_titles.any?{|existing_article_title| existing_article_title.chars.downcase.to_s.include?(phrase_string.chars.downcase)} #Unicode safe, too slow? :(
+    return existing_article_titles.any?{|existing_article_title| existing_article_title.downcase.include?(phrase_string.downcase)} #Not unicode safe?
   end
 
   #Determine if the text is in some sort of markup
@@ -166,11 +167,6 @@ class Document
     parsed_wiki_article_titles.uniq
   end
 
-  def break_up_phrase(phrase)
-    words = phrase.split(/[[:space:],.""'']+/)
-    words
-  end
-
   #a method to get rid of the duplicate results
   def clean_results(parse_results, existing_article_titles)
     cleaned_results = clean_results_of_partial_phrases(parse_results)
@@ -212,6 +208,26 @@ class Document
       (matching_article.redirect_target and existing_article_titles.any? {|article_title| matching_article.redirect_target.title.downcase == article_title.downcase}) #Not unicode safe?
     end
     results
+  end
+
+end
+
+#A phrase made up of words
+class Phrase
+  attr_reader :words
+
+  def initialize(words)
+    @words = words
+    @phrase = words.join(" ")
+  end
+
+  def to_s
+    @phrase
+  end
+
+  def self.build_from_document(document)
+    words = document.split(/[[:space:],.""'']+/)
+    phrase = Phrase.new(words)
   end
 
 end

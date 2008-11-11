@@ -11,11 +11,6 @@ class ArticleTest < Test::Unit::TestCase
     @auto_detect = "auto-detect"
   end
 
-  # Replace this with your real tests.
-  def test_truth
-    assert true
-  end
-
   #The tests in this method may not make sense right now
   def dont_test_clean_results
     repository = Repository.find(:first)

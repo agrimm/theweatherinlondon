@@ -61,7 +61,7 @@ class Document
   #Read in a document, and return an array of phrases and their matching articles
   def parse
     parse_results = []
-    0.upto(@words.size - 1) do |i|
+    @words.each_index do |i|
       i.upto(@words.size - 1) do |j|
         phrase = Phrase.new(@words[i..j])
         unless phrase_has_definitely_been_checked?(phrase, @existing_article_titles)

@@ -1,3 +1,5 @@
 development.log
 test.log
 production.log
+mongrel.pid
+mongrel.log

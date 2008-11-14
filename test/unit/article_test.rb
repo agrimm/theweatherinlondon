@@ -6,7 +6,7 @@ class ArticleTest < Test::Unit::TestCase
   fixtures :redirects
 
   def setup
-    @empty_document = Document.new("", Repository.find(:first), "auto-detect")
+    @empty_document = Document.new("Empty meaningless content", Repository.find(:first), "auto-detect")
     @af_uncyclopedia = Repository.find_by_abbreviation("af-uncyclopedia")
     @auto_detect = "auto-detect"
   end
@@ -122,7 +122,7 @@ class ArticleTest < Test::Unit::TestCase
   end
 
   def test_no_side_effects_on_document_text
-    document_text = "[[en:Wikipedia]]"
+    document_text = "[[en:Wikipedia]] meaningless text"
     original_document_text = document_text.dup
     repository = Repository.find_by_abbreviation("af-uncyclopedia")
     markup = "auto-detect"
@@ -228,6 +228,23 @@ class ArticleTest < Test::Unit::TestCase
     expected_results = []
     actual_results = parse_text_document(document_text, @af_uncyclopedia, @auto_detect)
     assert_equal expected_results, actual_results
+  end
+
+  def test_reject_too_many_words
+    maximum_words = Repository.maximum_allowed_document_size
+    too_big_document = "foo " * (maximum_words + 1)
+    assert_raise(ArgumentError) do
+      parse_text_document(too_big_document, @af_uncyclopedia, @auto_detect)
+    end
+  end
+
+  def test_reject_too_few_words
+    too_small_documents = ["", "foo "]
+    too_small_documents.each do |too_small_document|
+      assert_raise(ArgumentError) do
+        parse_text_document(too_small_document, @af_uncyclopedia, @auto_detect)
+      end
+    end
   end
 
 end

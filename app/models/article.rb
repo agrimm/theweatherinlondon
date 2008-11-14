@@ -55,7 +55,27 @@ class Document
     end
     phrase = Phrase.build_from_document(@parsed_document_text)
     @words = phrase.words
-    raise(ArgumentError, "Document has too many words") if @words.size > Repository.maximum_allowed_document_size
+    @errors = find_errors
+    raise(ArgumentError, @errors.first) unless @errors.empty?
+  end
+
+  def find_errors
+    errors = []
+    errors << "Document has too many words" if has_too_many_words?
+    errors << "Document has too few words" if has_too_few_words?
+    errors
+  end
+    
+  def has_too_few_words?
+    return (word_count < 2)
+  end
+
+  def has_too_many_words?
+    return (word_count > Repository.maximum_allowed_document_size)
+  end
+
+  def word_count
+    @words.size
   end
 
   #Read in a document, and return an array of phrases and their matching articles

@@ -34,6 +34,8 @@ class ReadController < ApplicationController
         rescue ArgumentError => error
           if error.message == "Document has too many words"
             @errors << "Please submit a text fewer than #{Repository.maximum_allowed_document_size} words long" 
+          elsif error.message == "Document has too few words"
+            @errors << "Please submit a text with at least two words in it"
           else
             raise
           end

@@ -2,15 +2,7 @@ class ReadController < ApplicationController
 
   def read
     @repository_choices = Repository.find(:all).map {|rc| [rc.short_description, rc.id]}
-    @default_repository_choice = params[:repository_id].to_i
-    if params[:repository_id].nil?
-      hard_wired_preference = "English language Wikipedia"
-      @repository_choices.each do |short_description, id_number|
-        if short_description == hard_wired_preference
-          @default_repository_choice = id_number
-        end
-      end
-    end
+    @default_repository_choice = determine_default_repository_choice
     @markup_choices = [ ["Auto-detect (default)", "auto-detect"], ["MediaWiki formatting", "mediawiki"], ["Plain text", "plain"] ]
     if request.post?
       @errors = []
@@ -43,5 +35,22 @@ class ReadController < ApplicationController
       end
     end
   end
+
+  private
+  def determine_default_repository_choice
+    unless params[:repository_id].nil?
+      default_repository_choice = params[:repository_id].to_i
+    else params[:repository_id].nil?
+      hard_wired_preference = "English language Wikipedia"
+      @repository_choices.each do |short_description, id_number|
+        if short_description == hard_wired_preference
+          default_repository_choice = id_number
+        end
+      end
+    end
+    return default_repository_choice
+  end
+
+
 
 end

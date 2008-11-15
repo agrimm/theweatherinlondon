@@ -1,4 +1,6 @@
 <% unless @errors.blank? %>
+  <H1>Errors with input</H1>
+  <p>The following errors were found:</p>
   <ul>
   <% for error in @errors %>
     <li><p><%= h(error) %></p></li>

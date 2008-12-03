@@ -189,6 +189,7 @@ class Document
 
   #a method to get rid of the duplicate results
   def clean_results(parse_results, existing_article_titles)
+    parse_results.uniq!
     cleaned_results = clean_results_of_partial_phrases(parse_results)
     cleaned_results = clean_results_of_redirects_to_detected_articles(cleaned_results)
     cleaned_results = clean_results_of_redirects_to_wikified_titles(cleaned_results, existing_article_titles)

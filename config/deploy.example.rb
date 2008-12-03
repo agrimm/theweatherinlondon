@@ -1,7 +1,10 @@
-require 'mongrel_cluster/recipes'
+#require 'mongrel_cluster/recipes'
 
 set :application, "weatherinlondon"
-set :repository,  "https://theweatherinlondon.googlecode.com/svn/trunk/"
+set :repository,  "git@github.com:agrimm/theweatherinlondon.git"
+
+default_run_options[:pty] = true
+set :branch, "master"
 
 set :user, "sample_user_name"
 
@@ -10,11 +13,11 @@ set :user, "sample_user_name"
 # via the :deploy_to variable:
 set :deploy_to, "/home/#{user}/#{application}"
 
-set :deploy_via, :export
+set :deploy_via, :copy
 
 # If you aren't using Subversion to manage your source code, specify
 # your SCM below:
-# set :scm, :subversion
+set :scm, :git
 
 #No mongrel cluster available
 #set :mongrel_conf, "#{current_path}/config/mongrel_cluster.yml"

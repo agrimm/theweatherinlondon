@@ -1,17 +1,20 @@
 #require 'mongrel_cluster/recipes'
 
-set :application, "weatherinlondon"
+set :use_sudo, false
+
+set :application, "mayweather"
 set :repository,  "git@github.com:agrimm/theweatherinlondon.git"
 
 default_run_options[:pty] = true
 set :branch, "master"
 
 set :user, "sample_user_name"
+raise "Forgot to set user name" if "#{user}" == "example_user_name"
 
 # If you aren't deploying to /u/apps/#{application} on the target
 # servers (which is the default), you can specify the actual location
 # via the :deploy_to variable:
-set :deploy_to, "/home/#{user}/#{application}"
+set :deploy_to, "/home/#{user}/etc/rails_apps/#{application}"
 
 set :deploy_via, :copy
 
